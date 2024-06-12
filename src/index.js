@@ -18,6 +18,7 @@ export default {
           const headers = new Headers();
           object.writeHttpMetadata(headers);
           headers.set("etag", object.httpEtag);
+          headers.set("last-modified", object.lastModified.toISOString());
 
           // Set Content-Type based on file extension
           const contentType = getContentTypeFromKey(key);
@@ -25,6 +26,7 @@ export default {
 
           // Enable CORS
           headers.set("Access-Control-Allow-Origin", "*");
+          headers.set("Vary", "Origin");
 
           // Set Cache-Control for client-side caching
           headers.set("Cache-Control", "public, max-age=86400"); // 24 hours
