@@ -5,7 +5,7 @@ export default {
 
     try {
       switch (request.method) {
-        case "GET":
+        case "GET": {
           // GET request: Retrieve the image from KV store
           const object = await env.IMAGES.get(key);
 
@@ -31,8 +31,8 @@ export default {
 
           // Return the image with appropriate headers
           return new Response(object.body, { headers });
-
-        default:
+        }
+        default: {
           // Unsupported method
           return new Response("Method Not Allowed", {
             status: 405,
@@ -40,6 +40,7 @@ export default {
               Allow: "GET",
             },
           });
+        }
       }
     } catch (error) {
       console.error("Error handling request:", error);
