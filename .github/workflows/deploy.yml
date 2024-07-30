@@ -4,9 +4,9 @@ on:
     branches:
       - main
 jobs:
-  upload:
+  upload-and-deploy:
     runs-on: ubuntu-latest
-    name: Deploy
+    name: Upload and Deploy
     steps:
       - uses: actions/checkout@v4
 
@@ -18,9 +18,20 @@ jobs:
           wranglerVersion: '3.67.1'
           command: --version
 
-      - name: Deploy Worker Version
+      - name: List Version IDs
+        id: list_versions
         run: |
-          LATEST_VERSION=$(npx wrangler versions list --json --experimental-versions --env prod | jq -r '.[0].id')
+          VERSIONS_JSON=$(npx wrangler versions list --experimental-versions --env prod --json)
+          echo "VERSIONS_JSON<<EOF" >> $GITHUB_OUTPUT
+          echo "$VERSIONS_JSON" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Deploy Latest Version
+        run: |
+          LATEST_VERSION=$(echo '${{ steps.list_versions.outputs.VERSIONS_JSON }}' | jq -r '.[0].id')
           npx wrangler versions deploy $LATEST_VERSION@100% --experimental-versions --env prod
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
