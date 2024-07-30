@@ -10,8 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: List Versions and Get Latest ID
-        id: get_latest_version
+      - name: List Versions
+        id: list_versions
         uses: cloudflare/wrangler-action@v3.7.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -22,7 +22,7 @@ jobs:
       - name: Extract Latest Version ID
         id: extract_version
         run: |
-          VERSIONS_JSON='${{ steps.get_latest_version.outputs.stdout }}'
+          VERSIONS_JSON='${{ steps.list_versions.outputs.result }}'
           echo "Versions JSON: $VERSIONS_JSON"
           LATEST_VERSION=$(echo "$VERSIONS_JSON" | jq -r '.[0].id')
           echo "Latest Version: $LATEST_VERSION"
