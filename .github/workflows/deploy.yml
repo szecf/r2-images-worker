@@ -9,6 +9,16 @@ jobs:
     name: Deploy
     steps:
       - uses: actions/checkout@v4
+
+      - name: Upload New Version
+        id: upload_version
+        uses: cloudflare/wrangler-action@v3.7.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '3.67.1'
+          command: versions upload --experimental-versions --env prod --message "${{ github.event.head_commit.message }}"
+
       - name: List Versions
         id: list_versions
         uses: cloudflare/wrangler-action@v3.7.0
@@ -17,24 +27,27 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.67.1'
           command: versions list --experimental-versions --env prod --json
-      - name: Extract Last Version
+
+      - name: Extract New Version ID
         id: extract_version
         run: |
           VERSIONS_JSON='${{ steps.list_versions.outputs.command-output }}'
           echo "Versions JSON: $VERSIONS_JSON"
-          LAST_VERSION=$(echo "$VERSIONS_JSON" | jq -r '.[-1].id')
-          echo "Last Version: $LAST_VERSION"
-          echo "last_version=$LAST_VERSION" >> $GITHUB_OUTPUT
-      - name: Deploy Last Version
-        if: steps.extract_version.outputs.last_version != ''
+          NEW_VERSION=$(echo "$VERSIONS_JSON" | jq -r '.[0].id')
+          echo "New Version: $NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Deploy New Version
+        if: steps.extract_version.outputs.new_version != ''
         uses: cloudflare/wrangler-action@v3.7.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.67.1'
-          command: versions deploy ${{ steps.extract_version.outputs.last_version }}@100% --experimental-versions --env prod --message "${{ github.event.head_commit.message }}"
+          command: versions deploy ${{ steps.extract_version.outputs.new_version }}@100% --experimental-versions --env prod
+
       - name: Error if no valid version
-        if: steps.extract_version.outputs.last_version == ''
+        if: steps.extract_version.outputs.new_version == ''
         run: |
           echo "Error: No valid version found"
           exit 1
