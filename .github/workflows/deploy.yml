@@ -15,6 +15,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.67.1'
-          command: |
-            LATEST_VERSION=$(wrangler versions list --experimental-versions --env prod | awk '/Version ID:/ {print $3; exit}')
-            wrangler versions deploy $LATEST_VERSION@100% --experimental-versions --env prod
+          command: versions deploy $(wrangler versions list --experimental-versions --env prod | awk '/Version ID:/ {print $3; exit}')@100% --experimental-versions --env prod
