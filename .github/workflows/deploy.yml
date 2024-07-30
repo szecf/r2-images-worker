@@ -3,15 +3,18 @@ on:
   push:
     branches:
       - main
+
 jobs:
   upload:
     runs-on: ubuntu-latest
     name: Deploy
     steps:
       - uses: actions/checkout@v4
+
       - name: Upload Worker Version
-        uses: cloudflare/wrangler-action@v3.7.0
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: versions deploy --message "${{ github.event.head_commit.message }}" --experimental-versions --env prod
+          wranglerVersion: '3.67.1'
+          command: versions upload --experimental-versions --message "'${{ github.event.head_commit.message }}'"
