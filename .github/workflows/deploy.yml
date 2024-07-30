@@ -10,10 +10,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Wrangler
+        uses: cloudflare/wrangler-action@v3.7.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '3.67.1'
+          command: version  # This will install Wrangler without doing anything else
+
       - name: List Versions and Extract Latest ID
         id: get_version
         run: |
-          VERSIONS_JSON=$(npx wrangler@3.67.1 versions list --experimental-versions --env prod --json)
+          VERSIONS_JSON=$(wrangler versions list --experimental-versions --env prod --json)
           echo "Versions JSON: $VERSIONS_JSON"
           LATEST_VERSION=$(echo "$VERSIONS_JSON" | jq -r '.[0].id')
           echo "Latest Version: $LATEST_VERSION"
