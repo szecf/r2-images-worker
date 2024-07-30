@@ -16,4 +16,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.67.1'
-          command: versions upload --experimental-versions --message "'${{ github.event.head_commit.message }}'"
+          command: versions upload --experimental-versions --message "${{ github.event.head_commit.message }}" --env prod
