@@ -9,16 +9,19 @@ jobs:
     name: Deploy
     steps:
       - uses: actions/checkout@v4
-      - name: Create deploy script
-        run: |
-          echo '#!/bin/sh' > deploy.sh
-          echo 'LATEST_VERSION=$(wrangler versions list --experimental-versions --env prod | awk "/Version ID:/ {print \$3; exit}")' >> deploy.sh
-          echo 'wrangler versions deploy $LATEST_VERSION@100% --experimental-versions --env prod' >> deploy.sh
-          chmod +x deploy.sh
-      - name: Deploy Worker Version
+
+      - name: Install Wrangler
         uses: cloudflare/wrangler-action@v3.7.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.67.1'
-          command: ./deploy.sh
+          command: --version  # This just installs Wrangler without running any commands
+
+      - name: Deploy Worker Version
+        run: |
+          LATEST_VERSION=$(npx wrangler versions list --experimental-versions --env prod | awk '/Version ID:/ {print $3; exit}')
+          npx wrangler versions deploy $LATEST_VERSION@100% --experimental-versions --env prod
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
