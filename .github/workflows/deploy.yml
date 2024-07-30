@@ -20,7 +20,7 @@ jobs:
       - name: Extract Latest Version
         id: extract_version
         run: |
-          VERSIONS_JSON='${{ steps.list_versions.outputs }}'
+          VERSIONS_JSON='${{ steps.list_versions.outputs.stdout }}'
           echo "Versions JSON: $VERSIONS_JSON"
           LATEST_VERSION=$(echo "$VERSIONS_JSON" | jq -r '.[0].id')
           echo "Latest Version: $LATEST_VERSION"
