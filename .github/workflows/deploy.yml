@@ -10,6 +10,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Generate Short SHA
+        id: short_sha
+        run: echo "SHA8=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_OUTPUT
+
       - name: Upload New Version
         id: upload_version
         uses: cloudflare/wrangler-action@v3.7.0
@@ -17,7 +21,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.67.1'
-          command: versions upload --experimental-versions --env prod --message "${{ github.event.head_commit.message }}" --tag "${{ github.sha::8 }}"
+          command: versions upload --experimental-versions --env prod --message "${{ github.event.head_commit.message }}" --tag "${{ steps.short_sha.outputs.SHA8 }}"
 
       - name: List Versions
         id: list_versions
