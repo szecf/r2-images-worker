@@ -14,4 +14,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: versions deploy --message "${{ github.event.head_commit.message }}"--experimental-versions --env prod
+          command: versions deploy --message "${{ github.event.head_commit.message }}" --experimental-versions --env prod
