@@ -11,8 +11,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: List Versions
-        uses: cloudflare/wrangler-action@v3.7.0
         id: list_versions
+        uses: cloudflare/wrangler-action@v3.7.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -24,7 +24,12 @@ jobs:
 
       - name: Get Latest Version ID
         id: get_latest_version
-        run: echo "LATEST_VERSION=$(echo '${{ steps.list_versions.outputs.result }}' | jq -r '.[0].id')" >> $GITHUB_OUTPUT
+        run: |
+          VERSIONS_JSON='${{ steps.list_versions.stdout }}'
+          echo "Versions JSON: $VERSIONS_JSON"
+          LATEST_VERSION=$(echo "$VERSIONS_JSON" | jq -r '.[0].id')
+          echo "Latest Version: $LATEST_VERSION"
+          echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_OUTPUT
 
       - name: Deploy Latest Version
         uses: cloudflare/wrangler-action@v3.7.0
