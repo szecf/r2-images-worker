@@ -48,7 +48,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.67.1'
-          command: versions deploy ${{ steps.extract_version.outputs.new_version }}@100% --experimental-versions --env prod
+          command: versions deploy ${{ steps.extract_version.outputs.new_version }}@100% --experimental-versions --env prod -y
 
       - name: Error if no valid version
         if: steps.extract_version.outputs.new_version == ''
