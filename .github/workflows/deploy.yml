@@ -9,38 +9,32 @@ jobs:
     name: Deploy
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install Wrangler
+      - name: List Versions
+        id: list_versions
         uses: cloudflare/wrangler-action@v3.7.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.67.1'
-          command: version  # This will install Wrangler without doing anything else
-
-      - name: List Versions and Extract Latest ID
-        id: get_version
+          command: versions list --experimental-versions --env prod --json
+      - name: Extract Latest Version ID
+        id: extract_version
         run: |
-          VERSIONS_JSON=$(wrangler versions list --experimental-versions --env prod --json)
+          VERSIONS_JSON='${{ steps.list_versions.outputs.stdout }}'
           echo "Versions JSON: $VERSIONS_JSON"
           LATEST_VERSION=$(echo "$VERSIONS_JSON" | jq -r '.[0].id')
           echo "Latest Version: $LATEST_VERSION"
           echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
       - name: Deploy Latest Version
-        if: steps.get_version.outputs.latest_version != ''
+        if: steps.extract_version.outputs.latest_version != ''
         uses: cloudflare/wrangler-action@v3.7.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.67.1'
-          command: versions deploy ${{ steps.get_version.outputs.latest_version }}@100% --experimental-versions --env prod --message "${{ github.event.head_commit.message }}"
-
+          command: versions deploy ${{ steps.extract_version.outputs.latest_version }}@100% --experimental-versions --env prod --message "${{ github.event.head_commit.message }}"
       - name: Error if no valid version
-        if: steps.get_version.outputs.latest_version == ''
+        if: steps.extract_version.outputs.latest_version == ''
         run: |
           echo "Error: No valid version found"
           exit 1
