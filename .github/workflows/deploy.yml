@@ -16,11 +16,11 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.67.1'
-          command: --version  # This just installs Wrangler without running any commands
+          command: --version
 
       - name: Deploy Worker Version
         run: |
-          LATEST_VERSION=$(npx wrangler versions list --experimental-versions --env prod | awk '/Version ID:/ {print $3; exit}')
+          LATEST_VERSION=$(npx wrangler versions list --json --experimental-versions --env prod | jq -r '.[0].id')
           npx wrangler versions deploy $LATEST_VERSION@100% --experimental-versions --env prod
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
