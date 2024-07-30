@@ -3,17 +3,23 @@ on:
   push:
     branches:
       - main
-
 jobs:
   upload:
     runs-on: ubuntu-latest
     name: Deploy
     steps:
       - uses: actions/checkout@v4
+      - name: List Versions
+        uses: cloudflare/wrangler-action@v3.7.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '3.67.1'
+          command: versions list --experimental-versions --env prod
       - name: Deploy Worker Version
         uses: cloudflare/wrangler-action@v3.7.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.67.1'
-          command: versions deploy --experimental-versions --message "${{ github.event.head_commit.message }}" --env prod
+          command: versions deploy $(wrangler versions list --experimental-versions --env prod | grep -m 1 "Version ID:" | awk '{print $3}')@100% --experimental-versions --env prod
