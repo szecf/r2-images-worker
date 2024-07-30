@@ -9,6 +9,7 @@ jobs:
     name: Deploy
     steps:
       - uses: actions/checkout@v4
+
       - name: List Versions
         id: list_versions
         uses: cloudflare/wrangler-action@v3.7.0
@@ -17,14 +18,16 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.67.1'
           command: versions list --experimental-versions --env prod --json
+
       - name: Extract Latest Version
         id: extract_version
         run: |
-          VERSIONS_JSON='${{ steps.list_versions.outputs.stdout }}'
+          VERSIONS_JSON='${{ steps.list_versions.outputs.command-output }}'
           echo "Versions JSON: $VERSIONS_JSON"
           LATEST_VERSION=$(echo "$VERSIONS_JSON" | jq -r '.[0].id')
           echo "Latest Version: $LATEST_VERSION"
           echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+
       - name: Deploy Latest Version
         if: steps.extract_version.outputs.latest_version != ''
         uses: cloudflare/wrangler-action@v3.7.0
@@ -33,6 +36,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.67.1'
           command: versions deploy ${{ steps.extract_version.outputs.latest_version }}@100% --experimental-versions --env prod --message "${{ github.event.head_commit.message }}"
+
       - name: Error if no valid version
         if: steps.extract_version.outputs.latest_version == ''
         run: |
