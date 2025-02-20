@@ -14,17 +14,17 @@ name = "staging-r2-images-worker"
 vars = { ENVIRONMENT = "staging" }
 workers_dev = true
 r2_buckets = [
-	{ binding ="IMAGES", bucket_name = "images"}
+	{ binding ="TESTR2", bucket_name = "testr2loadbalancing"}
 ]
 
 [env.prod]
 name = "prod-r2-images-worker"
 vars = { ENVIRONMENT = "production" }
 routes = [
-    { pattern = "cdn.erfianugrah.com", custom_domain = true },
+    { pattern = "testr2loadbalancing.srthamget.com", custom_domain = true },
 ]
 r2_buckets = [
-	{ binding ="IMAGES", bucket_name = "images"}
+	{ binding ="TESTR2", bucket_name = "testr2loadbalancing"}
 ]
 # Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#r2-buckets
